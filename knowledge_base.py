@@ -9,7 +9,7 @@ load_dotenv()
 
 # Get API key from environment
 VAPI_API_KEY = os.getenv('VAPI_API_KEY')
-ASSISTANT_ID = '4aff2cad-02c0-4e1a-8363-99a0391569a0'
+ASSISTANT_ID = '3113a0ea-18f7-4898-b936-36010399eb93'  # Correct assistant ID
 AVAILABILITY_TOOL_ID = '93521a4e-dc20-4bf6-bd49-12c4300afd13'  # Latest tool ID from availability_tool.py
 
 class KnowledgeBaseManager:
@@ -79,7 +79,7 @@ class KnowledgeBaseManager:
         return response.json()
 
 def update_assistant():
-    """Update the assistant configuration with voice settings and tools"""
+    """Update the assistant configuration with voice settings"""
     url = f"https://api.vapi.ai/assistant/{ASSISTANT_ID}"
     headers = {
         "Authorization": f"Bearer {VAPI_API_KEY}",
@@ -94,28 +94,7 @@ def update_assistant():
         "model": {
             "provider": "anthropic",
             "model": "claude-3-opus-20240229"
-        },
-        "tools": [
-            {
-                "id": AVAILABILITY_TOOL_ID
-            }
-        ],
-        "messages": [
-            {
-                "role": "system",
-                "content": """You are Alfred, the AI concierge for Bella Vista Suites, a luxury hotel on Lake Geneva.
-                You help guests with room availability, bookings, and general inquiries.
-                You have access to real-time room availability through the hotel's booking system.
-                Be professional, courteous, and helpful at all times.
-                
-                When checking room availability:
-                1. Always ask for the specific dates the guest is interested in
-                2. If they have a preference for room type, use that in the search
-                3. Present available options with rates and amenities
-                4. Highlight special features like lake views or spa tubs
-                5. Be ready to suggest alternatives if preferred rooms are not available"""
-            }
-        ]
+        }
     }
     
     try:
