@@ -2,6 +2,15 @@ import os
 import requests
 from typing import Dict, List
 import json
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+# Get API key from environment
+VAPI_API_KEY = os.getenv('VAPI_API_KEY')
+ASSISTANT_ID = '4aff2cad-02c0-4e1a-8363-99a0391569a0'
+AVAILABILITY_TOOL_ID = '93521a4e-dc20-4bf6-bd49-12c4300afd13'  # Latest tool ID from availability_tool.py
 
 class KnowledgeBaseManager:
     def __init__(self, api_key: str):
@@ -47,57 +56,19 @@ class KnowledgeBaseManager:
                 "provider": "google",
                 "model": "gemini-2.0-flash",
                 "voice": {
-                    "provider": "cartesia",
-                    "voiceId": "11af83e2-23eb-452f-956e-7fee218ccb5c",
-                    "model": "sonic-english"
+                    "provider": "deepgram",
+                    "voiceId": "luna"
                 },
                 "messages": [
                     {
                         "role": "system",
-                        "content": """You are Ellie, a professional concierge at Bella Vista Suites, a luxury boutique hotel located on the shores of Lake Geneva.
-
-Key Responsibilities:
-- Handle room bookings and spa appointments
-- Provide information about hotel amenities and services
-- Give local recommendations
-- Process payments and handle deposits
-
-Communication Guidelines:
-- Maintain a warm and professional tone
-- Ask only ONE question at a time
-- Verify all details before proceeding
-- Keep conversations natural and flowing
-- Never share sensitive guest information
-
-Hotel Details:
-- Address: 335 Wrigley Drive, Lake Geneva, WI 53147
-- Phone: (262) 248-2100
-- 39 Luxury Suites available
-- Full-service spa and amenities
-- Beachfront location with walking distance to downtown
-
-Room Types:
-1. Presidential Suite (1,170 sq ft) - Two bedrooms, lake view
-2. Governor Suite (1,120 sq ft) - Two bedrooms, lake view
-3. Penthouse Suite (1,720 sq ft) - Two bedrooms, double balcony
-4. Woodland Suite (560 sq ft) - Park view
-5. Lakeside Suite (550 sq ft) - Lake view
-6. Beachview Suite (700 sq ft) - Lake view, double Jacuzzi
-7. Villa Suite (600 sq ft) - Lake view
-8. Parkview Suite (475 sq ft) - Park view
-9. St. Moritz Suite (750 sq ft) - Partial lake view
-
-All suites include:
-- King-sized pillow-top beds
-- Private balcony
-- Jetted bathtub
-- Rain-head shower
-- Kitchenette/wet bar
-- Sofa bed
-- Flat-screen TVs
-- Free WiFi"""
+                        "content": """You are Alfred, the AI concierge for Bella Vista Suites, a luxury hotel on Lake Geneva.
+                        You help guests with room availability, bookings, and general inquiries.
+                        You have access to real-time room availability through the hotel's booking system.
+                        Be professional, courteous, and helpful at all times."""
                     }
-                ]
+                ],
+                "temperature": 0.7
             }
         }
         
@@ -106,6 +77,58 @@ All suites include:
             print(f"Error response: {response.text}")
         response.raise_for_status()
         return response.json()
+
+def update_assistant():
+    """Update the assistant configuration with voice settings and tools"""
+    url = f"https://api.vapi.ai/assistant/{ASSISTANT_ID}"
+    headers = {
+        "Authorization": f"Bearer {VAPI_API_KEY}",
+        "Content-Type": "application/json"
+    }
+    
+    config = {
+        "voice": {
+            "provider": "deepgram",
+            "voiceId": "luna"
+        },
+        "model": {
+            "provider": "anthropic",
+            "model": "claude-3-opus-20240229"
+        },
+        "tools": [
+            {
+                "id": AVAILABILITY_TOOL_ID
+            }
+        ],
+        "messages": [
+            {
+                "role": "system",
+                "content": """You are Alfred, the AI concierge for Bella Vista Suites, a luxury hotel on Lake Geneva.
+                You help guests with room availability, bookings, and general inquiries.
+                You have access to real-time room availability through the hotel's booking system.
+                Be professional, courteous, and helpful at all times.
+                
+                When checking room availability:
+                1. Always ask for the specific dates the guest is interested in
+                2. If they have a preference for room type, use that in the search
+                3. Present available options with rates and amenities
+                4. Highlight special features like lake views or spa tubs
+                5. Be ready to suggest alternatives if preferred rooms are not available"""
+            }
+        ]
+    }
+    
+    try:
+        print("Updating assistant configuration...")
+        response = requests.patch(url, headers=headers, json=config)
+        response.raise_for_status()
+        print("Successfully updated assistant configuration!")
+        return response.json()
+    except Exception as e:
+        print(f"Error updating assistant: {str(e)}")
+        if hasattr(e, 'response'):
+            print(f"Response: {e.response.text}")
+        return None
 
 def main():
     # Initialize with your API key
@@ -130,4 +153,4 @@ def main():
             print(f"Response details: {e.response.text}")
 
 if __name__ == "__main__":
-    main() 
+    update_assistant() 
