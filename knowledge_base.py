@@ -46,6 +46,11 @@ class KnowledgeBaseManager:
                 "knowledgeBaseId": knowledge_base_id,
                 "provider": "google",
                 "model": "gemini-2.0-flash",
+                "voice": {
+                    "provider": "cartesia",
+                    "voiceId": "11af83e2-23eb-452f-956e-7fee218ccb5c",
+                    "model": "sonic-english"
+                },
                 "messages": [
                     {
                         "role": "system",
